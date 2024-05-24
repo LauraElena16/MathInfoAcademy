@@ -1,0 +1,23 @@
+<!-- test.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test Form</title>
+    <meta description="cacamaca" />
+  </head>
+  <body>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+        <div>
+          {{ field.label_tag }} {{ field }}
+          {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+          {% for error in field.errors %}<p style="color: red">{{ error }}</p>{% endfor %}
+        </div>
+      {% endfor %}
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
