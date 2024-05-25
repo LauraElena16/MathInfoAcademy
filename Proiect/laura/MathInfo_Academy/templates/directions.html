@@ -1,88 +1,110 @@
-{% load static %}
+{% extends 'navbar.html' %}
+<!-- {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{% static 'styles/directions.css' %}" />
-        <script defer src="{% static 'scripts/directions.js' %}"></script>
-    </head>
-    <body>
-        <div class="big-grid">
-            <div class="left-grid">
-                <div id="dropdowns">
-                    <div class="dropdown">
-                        <h3>Select start</h3>
-                        <input type="text"
-                               placeholder="Search..."
-                               id="searchBar1"
-                               class="searchbar"
-                               onkeyup="filterFunction('searchBar1', 'myDropdown1')"
-                               onfocus="focusSearchBar('searchBar1')"
-                               onblur="unfocusSearchBar('searchBar1')">
-                        <div id="myDropdown1" class="dropdown-content">
-                            {% for room in rooms %}
-                                {% if room.no_room == "0" or room.details != none and "Toilet" in room.details %}
-                                    <a onclick="setStart('{{ room.label }}', '{{ room.details }}')">{{ room.details }}</a>
-                                {% elif room.no_room != '0' and room.details != none and not "Toilet" in room.details %}
-                                    <a onclick="setStart('{{ room.label }}', 'Room ' + '{{ room.no_room }}' + ' (' + '{{ room.details }}' + ')')">Room {{ room.no_room }} ({{ room.details }})</a>
-                                {% else %}
-                                    <a onclick="setStart('{{ room.label }}', 'Room ' + '{{ room.no_room }}')">Room {{ room.no_room }}</a>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="dropdown">
-                        <h3>Select destination</h3>
-                        <input type="text"
-                               placeholder="Search..."
-                               id="searchBar2"
-                               class="searchbar"
-                               onkeyup="filterFunction('searchBar2', 'myDropdown2')"
-                               onfocus="focusSearchBar('searchBar2')"
-                               onblur="unfocusSearchBar('searchBar2')">
-                        <div id="myDropdown2" class="dropdown-content">
-                            {% for room in rooms %}
-                                {% if room.no_room == "0" or room.details != none and "Toilet" in room.details or "Terrace" in room.details %}
-                                    <a onclick="setDestination('{{ room.label }}', '{{ room.details }}')">{{ room.details }}</a>
-                                {% elif room.no_room != '0' and room.details != none and not "Toilet" in room.details and not "Terrace" in room.details %}
-                                    <a onclick="setDestination('{{ room.label }}', 'Room ' + '{{ room.no_room }}' + ' (' + '{{ room.details }}' + ')')">Room {{ room.no_room }} ({{ room.details }})</a>
-                                {% else %}
-                                    <a onclick="setDestination('{{ room.label }}', 'Room ' + '{{ room.no_room }}')">Room {{ room.no_room }}</a>
-                                {% endif %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-                <form action="/directions/" method="post">
-                    {% csrf_token %}
-                    <input name="start" id="start_node_input" type="hidden" value="-1">
-                    <input name="finish" id="end_node_input" type="hidden" value="-1">
-                    <input type="submit" value="Get Directions" class="primary-btn">
-                </form>
-            </div>
-            <div id="result-container">
-                {% if not directions and not error %}
-                    <h2>
-                        Select <span class="green">start</span> and <span class="green">destination</span> to get directions.
-                    </h2>
-                {% elif error %}
-                    <h2 class="red">{{ error }}</h2>
-                {% else %}
-                    <h2>
-                        Directions from <span class="green">{{ start }}</span> to <span class="green">{{ finish }}</span>
-                    </h2>
-                    <br>
-                    <div id="directions">
-                        {% for direction in directions %}
-                            <div class="direction">
-                                <div class="direction-text">
-                                    <p>{{ direction }}</p>
-                                </div>
-                            </div>
+<html lang="en"> -->
+
+{% block content %}
+<div class="super-container">
+    <link rel="stylesheet" href="{% static 'styles/directions.css' %}" />
+    <script defer src="{% static 'scripts/directions.js' %}"></script>
+    <div class="big-grid">
+        <div class="left-grid">
+            <div id="dropdowns">
+                <div class="dropdown">
+                    <h3>Select start</h3>
+                    <input type="text" placeholder="Search..." id="searchBar1" class="searchbar"
+                        onkeyup="filterFunction('searchBar1', 'myDropdown1')" onfocus="focusSearchBar('searchBar1')"
+                        onblur="unfocusSearchBar('searchBar1')">
+                    <div id="myDropdown1" class="dropdown-content">
+                        {% for room in rooms %}
+                        {% if room.no_room == "0" or room.details != none and "Toilet" in room.details or "Terrace" in room.details %}
+                        <a onclick="setStart('{{ room.label }}', '{{ room.details }}')">{{ room.details }}</a>
+                        {% elif room.no_room != '0' and room.details != none and not "Toilet" in room.details and not "Terrace" in room.details %}
+                        <a
+                            onclick="setStart('{{ room.label }}', 'Room ' + '{{ room.no_room }}' + ' (' + '{{ room.details }}' + ')')">Room
+                            {{ room.no_room }} ({{ room.details }})</a>
+                        {% else %}
+                        <a onclick="setStart('{{ room.label }}', 'Room ' + '{{ room.no_room }}')">Room {{ room.no_room }}</a>
+                        {% endif %}
                         {% endfor %}
                     </div>
-                {% endif %}
+                </div>
+                <div class="dropdown">
+                    <h3>Select destination</h3>
+                    <input type="text" placeholder="Search..." id="searchBar2" class="searchbar"
+                        onkeyup="filterFunction('searchBar2', 'myDropdown2')" onfocus="focusSearchBar('searchBar2')"
+                        onblur="unfocusSearchBar('searchBar2')">
+                    <div id="myDropdown2" class="dropdown-content">
+                        {% for room in rooms %}
+                        {% if room.no_room == "0" or room.details != none and "Toilet" in room.details or "Terrace" in room.details %}
+                        <a onclick="setDestination('{{ room.label }}', '{{ room.details }}')">{{ room.details }}</a>
+                        {% elif room.no_room != '0' and room.details != none and not "Toilet" in room.details and not "Terrace" in room.details %}
+                        <a
+                            onclick="setDestination('{{ room.label }}', 'Room ' + '{{ room.no_room }}' + ' (' + '{{ room.details }}' + ')')">Room
+                            {{ room.no_room }} ({{ room.details }})</a>
+                        {% else %}
+                        <a onclick="setDestination('{{ room.label }}', 'Room ' + '{{ room.no_room }}')">Room {{ room.no_room }}</a>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
+            <form action="/directions/" method="post">
+                {% csrf_token %}
+                <input name="start" id="start_node_input" type="hidden" value="-1">
+                <input name="finish" id="end_node_input" type="hidden" value="-1">
+                <input type="submit" value="Get Directions" class="primary-btn">
+            </form>
         </div>
-    </body>
-</html>
+        <div id="result-container">
+            {% if not directions and not error %}
+            <h2>
+                Select <span class="green">start</span> and <span class="green">destination</span> to get directions.
+            </h2>
+            {% elif error %}
+            <h2 class="red">{{ error }}</h2>
+            {% else %}
+            <h2>
+                Directions from <span class="green">{{ start }}</span> to <span class="green">{{ finish }}</span>
+            </h2>
+            <br>
+            <div id="directions">
+                {% for direction in directions %}
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="direction">
+                                {{ direction }}
+                                {% if "destination" in direction|lower %}
+                                    <img src="{% static 'images/destination.png' %}" alt="destination" class="destination-icon">
+                                {% elif "enter the faculty" in direction|lower %}
+                                    <img src="{% static 'images/enter_faculty.png' %}" alt="Enter faculty" class="destination-icon">
+                                {% elif "exit" in direction|lower %}
+                                    <img src="{% static 'images/exit.png' %}" alt="Exit" class="destination-icon">
+                                {% elif "the left" in direction|lower %}
+                                    <img src="{% static 'images/turn_left.png' %}" alt="Turn left" class="destination-icon">
+                                {% elif "the right" in direction|lower %}
+                                    <img src="{% static 'images/turn_right.png' %}" alt="Turn right" class="destination-icon">
+                                {% elif "go up" in direction|lower %}
+                                    <img src="{% static 'images/up_stairs.png' %}" alt="Go up the stairs" class="destination-icon">
+                                {% elif "go down" in direction|lower %}
+                                    <img src="{% static 'images/down_stairs.png' %}" alt="Go down the stairs" class="destination-icon">
+                                {% elif "straight ahead" in direction|lower %}
+                                    <img src="{% static 'images/straight.png' %}" alt="Go straight ahead" class="destination-icon">  
+                                {% elif "in front" in direction|lower %}
+                                    <img src="{% static 'images/stairs.png' %}" alt="Stairs in front of you" class="destination-icon">  
+                                   
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+    
+{% endblock %}
+
+
+

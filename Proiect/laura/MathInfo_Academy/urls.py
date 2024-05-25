@@ -6,6 +6,7 @@ urlpatterns = [
     # path('test/', views.test, name='test'),
     path('login/', views.login, name='login'),
     path('logout/', views.logout, name='logout'),
-    path('directions/', views.directions, name='directions')
+    path('directions/', views.directions, name='directions'),
+    path('navbar/', views.navbar, name='navbar')
     # path pentru pagina cu directii
 ]

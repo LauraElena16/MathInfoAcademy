@@ -9,7 +9,7 @@
 
 .big-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 4fr 5fr;
     gap: 2em;
     place-items: center;
     height: 100%;
@@ -49,25 +49,62 @@
     color: red;
 }
 
+.super-container{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+}
+
 #result-container {
+    margin-top: 5em;
+    padding: 1em;
     display: flex;
     text-align: center;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background-color: rgb(243, 243, 243);
-    width: 100%;
-    height: 100%;
+    width: 50vw;
+    height: 80%;
+    overflow-y: auto;
+    border-radius: 10px;
 }
 
 #directions {
+    width: 100%;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    align-items: center;
+    overflow-y: scroll;
+}
+
+.destination-icon{
+    width: 50px;
+    height: 50px;
+}
+
+.col-container {
     display: flex;
     flex-direction: column;
     gap: 0.1em;
     align-items: center;
     justify-content: center;
     max-height: 100%;
-    overflow-y: scroll;
+}
+
+.direction {
+    width:40vw; 
+    height: 40px; 
+    word-wrap: break-word;
+    display: flex;
+    padding: 0.5em;
+    align-items: center;    
+    justify-content: space-between;
 }
 
 .dropdown {

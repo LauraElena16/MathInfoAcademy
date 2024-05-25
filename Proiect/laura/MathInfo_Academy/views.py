@@ -46,6 +46,9 @@ def user_logout(request):
     auth.logout(request)
     return redirect('/')
 
+def navbar(request):
+    return render(request, 'navbar.html', {})
+
 def directions(request):
     graph = Graph()
     print("HERE:", -1 in graph.info)
