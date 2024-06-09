@@ -1,38 +1,34 @@
 from django.shortcuts import render
-# from .forms import TestForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User, auth
+from django.contrib.auth.models import auth
 from django.shortcuts import render, redirect
 from graph.Graph import Graph, NodeDetails
+from django.http import Http404
 
 
-# Create your views here.
+from MathInfo_Academy.models import User, Materials, Students_Activity, Subject, Teacher_Activity
+from .forms import RegistrationForm
+from django.contrib.auth.decorators import login_required
+
+from django.core.files.storage import default_storage
+
+
+
+
 def home(request):
-    return render(request, 'home.html', {}) # {} is an empty dictionary
+    return render(request, 'home.html', {}) 
 
-
-# def test(request):
-#     if request.method == 'POST':
-#         form = TestForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             return render(request, 'success.html')
-#         print(form.errors)
-#         return render(request, 'test.html', {'form': form})
-#     else:
-#         context = {'form': TestForm()}
-#         return render(request, 'test.html', context)
-
-def user_logout(request):    
-    auth.logout(request)
-    return redirect('/')
 
 def user_login(request):
+    if request.user.is_authenticated:
+        return redirect('/')
+    
     if request.method == 'POST':
-        email = request.POST['email']
+        username = request.POST['username']
         password = request.POST['password']
-        user = auth.authenticate(email=email, password=password)
+        user = auth.authenticate(username=username, password=password)
+        print(user)
         if user is not None:
             auth.login(request, user)
             return redirect('/')
@@ -41,13 +37,131 @@ def user_login(request):
             return redirect('login')
     else:
         return render(request, 'login.html', {})
+    
 
 def user_logout(request):
+    if not request.user.is_authenticated:
+            return redirect('/login')
     auth.logout(request)
     return redirect('/')
 
-def navbar(request):
-    return render(request, 'navbar.html', {})
+
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('/')
+    
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)        
+        if form.is_valid():
+            form.save()            
+            return redirect('login')
+    else:
+        form = RegistrationForm()
+    return render(request, 'register.html', {'form': form})
+ 
+
+
+
+
+@login_required
+def activity(request):
+    if request.method != 'GET':
+        return redirect('/')
+    
+    if request.user.is_student:
+        student_activities = list(Students_Activity.objects.filter(student=request.user))
+        info_dict = {}
+        for student_activity in student_activities:
+            teacher_activity = student_activity.teacher_activity
+            course_name = teacher_activity.course.name
+            activity_type = teacher_activity.activity_type
+
+            if course_name not in info_dict:
+                info_dict[course_name] = {}
+
+            if activity_type not in info_dict[course_name]:
+                info_dict[course_name][activity_type] = []
+
+            materials = Materials.objects.filter(teacher_activity=teacher_activity)
+            for material in materials:
+                info_dict[course_name][activity_type].append({
+                    'url': material.documentation.url,
+                    'name': material.documentation.name.split('/')[-1]
+                })
+
+        return render(request, 'activity.html', {'info_dict': info_dict})
+        
+    else:
+        teacher_activities = list(Teacher_Activity.objects.filter(teacher=request.user))
+        info_dict = {}
+        teach_act_dict = {}
+        for teacher_activity in teacher_activities:
+            course_name = teacher_activity.course.name
+            activity_type = teacher_activity.activity_type
+
+            if course_name not in info_dict:
+                info_dict[course_name] = {}
+                teach_act_dict[course_name] = {}
+
+            if activity_type not in info_dict[course_name]:
+                info_dict[course_name][activity_type] = []
+                teach_act_dict[course_name][activity_type] = teacher_activity
+
+            materials = Materials.objects.filter(teacher_activity=teacher_activity)
+            for material in materials:
+                info_dict[course_name][activity_type].append({
+                    'url': material.documentation.url,
+                    'name': material.documentation.name.split('/')[-1],
+                    'id': material.id
+                })
+
+        return render(request, 'activity.html', {'info_dict': info_dict, 'teach_act_dict': teach_act_dict})
+
+
+def upload_material(request, course_name, activity_type):
+    if request.method == 'POST' and request.user.is_teacher:
+        teacher = request.user  
+        course = Subject.objects.get(name=course_name)
+        teacher_activity = Teacher_Activity.objects.get(teacher=teacher, course=course, activity_type=activity_type)
+        if 'documentation' not in request.FILES:
+            messages.error(request, 'No file selected for upload!')
+            return redirect('/activity')
+        documentation = request.FILES['documentation']
+        if documentation.name.split('.')[-1] != 'pdf':
+            messages.error(request, 'Invalid file format! Please, upload a pdf file!')
+            return redirect('/activity')
+        form = Materials(teacher_activity=teacher_activity, documentation=request.FILES['documentation'])
+        form.save()
+        messages.success(request, 'Material uploaded successfully!')
+        return redirect('/activity')
+    else:
+        return redirect('/')
+
+
+
+def delete_material(request, material_id):
+    material = Materials.objects.get(id=material_id)
+
+    try:
+        material = Materials.objects.get(id=material_id)
+    except Materials.DoesNotExist:
+        messages.error("Material not found!")
+
+
+    if request.user.is_teacher:
+        if default_storage.exists(material.documentation.name):
+            default_storage.delete(material.documentation.name)
+        material.delete()
+
+        messages.success(request, 'Material deleted successfully!')
+
+        return redirect('/activity')
+    
+    else:
+        return redirect('/')
+
+    
 
 def directions(request):
     graph = Graph()
@@ -70,6 +184,7 @@ def directions(request):
 
         except ValueError:
             error = "Invalid input"
+
 
     def process_node(node: int, graph: Graph):
         if node == None:
@@ -95,9 +210,115 @@ def directions(request):
         })
 
 
+@login_required
+def grades(request):
+    if request.method != 'GET':
+        return redirect('/')
+    
+    if request.user.is_student:
+        student_activities = list(Students_Activity.objects.filter(student=request.user))
+        info_dict = {}
+        credits = {}
+        course_grades = {}
+        for student_activity in student_activities:
+            teacher_activity = student_activity.teacher_activity
+            course_name = teacher_activity.course.name
+            activity_type = teacher_activity.activity_type
+            credits[course_name] = teacher_activity.course.credits
+
+            if course_name not in info_dict:
+                info_dict[course_name] = {}
+                course_grades[course_name] = [0, 0]
+
+            info_dict[course_name][activity_type] = {
+                "grade": student_activity.grade,
+                "max_grade": teacher_activity.max_grade,
+            }
+            
+            course_grades[course_name][0] += student_activity.grade
+            course_grades[course_name][1] += teacher_activity.max_grade
+            
+        for course in course_grades:
+            course_grades[course][0] = course_grades[course][0] / course_grades[course][1] * 10
+            course_grades[course][1] = 10.0
+
+        return render(request, 'grades.html', {'info_dict': info_dict, 'credits': credits, 'course_grades': course_grades})
+
+    else:
+        teacher_activities = list(Teacher_Activity.objects.filter(teacher=request.user))
+        info_dict = {}
+        max_grades = {}
+        teach_act_ids = {}
+        for teacher_activity in teacher_activities:
+            course_name = teacher_activity.course.name
+            activity_type = teacher_activity.activity_type
+
+            if course_name not in info_dict:
+                info_dict[course_name] = {}
+                max_grades[course_name] = {}
+                teach_act_ids[course_name] = {}
+
+            if activity_type not in info_dict[course_name]:
+                info_dict[course_name][activity_type] = []
+                max_grades[course_name][activity_type] = teacher_activity.max_grade
+                teach_act_ids[course_name][activity_type] = teacher_activity.id
+
+            students_activities = list(Students_Activity.objects.filter(teacher_activity=teacher_activity))
+            for student_activity in students_activities:
+                info_dict[course_name][activity_type].append([student_activity.id, student_activity.student.first_name, student_activity.student.last_name, student_activity.grade])
+
+        return render(request, 'grades.html', {'info_dict': info_dict, 'max_grades': max_grades, 'teach_act_ids': teach_act_ids})
 
 
+@login_required
+def grade_student(request, student_activity_id):
+    if request.method == 'POST' and request.user.is_teacher:
+        student_activity = Students_Activity.objects.get(id=student_activity_id)
+        student = student_activity.student
+        teacher_activity = student_activity.teacher_activity
+        grade = request.POST['new_grade']
+        if grade == '':
+            messages.error(request, 'Please, enter a grade!')
+            return redirect('/grades')
+        try:
+            grade = float(grade)
+        except ValueError:
+            messages.error(request, 'Invalid grade! Please, enter a number!')
+            return redirect('/grades')
+       
+        if grade < 0 or grade > teacher_activity.max_grade:
+            messages.error(request, 'Invalid grade! Please, enter a grade between 0 and the maximum grade!')
+            return redirect('/grades')
+        student_activity = Students_Activity.objects.get(student=student, teacher_activity=teacher_activity)
+        student_activity.grade = grade
+        student_activity.save()
+        messages.success(request, 'Grade updated successfully!')
+        return redirect('/grades')
+    
+    else:
+        return redirect('/grades')
 
-# view pentru pagina cu directii care la GET trimite pagina doar cu informatiile 
-# despre noduri
-# la POST trimite si indicatiile de orientare
+
+@login_required
+def modify_max_grade(request, teacher_activity_id):
+    if request.method == 'POST' and request.user.is_teacher:
+        new_max_grade = request.POST['new_max_grade']
+        if new_max_grade == '':
+            messages.error(request, 'Please, enter a grade!')
+            return redirect('/grades')
+        try:
+            grade = float(new_max_grade)
+        except ValueError:
+            messages.error(request, 'Invalid grade! Please, enter a number!')
+            return redirect('/grades')
+        
+        if grade < 0:
+            messages.error(request, 'Invalid grade! Please, enter a positive number!')
+            return redirect('/grades')
+        teacher_activity = Teacher_Activity.objects.get(id=teacher_activity_id)
+        teacher_activity.max_grade = new_max_grade
+        teacher_activity.save()
+        messages.success(request, 'Max grade updated successfully!')
+    return redirect('/grades')
+
+

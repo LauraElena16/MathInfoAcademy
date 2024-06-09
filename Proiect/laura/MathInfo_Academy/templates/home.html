@@ -1,0 +1,33 @@
+{% extends 'navbar.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'styles/home.css' %}">
+    <div class="container1">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center">Welcome to MathInfo Academy!</h1>
+            </div>
+        </div>
+        <br>
+
+        <div class=“row”> 
+            <div class=“col-12”> <h3 class=“text-center”>Discover the “Directions” Page</h3> <p class=“text-center” style="text-indent: 50px;">The “Directions” page is an intuitive and easy-to-use guide, designed to help you navigate through the MathInfo Academy campus. This resource is accessible to everyone, whether you’re a student, teacher, or visitor, and does not require authentication. Whether you’re looking for your lecture hall or lab, the “Directions” page provides clear and concise directions. All you need to do is enter your starting room and destination room, and our system will provide you with the quickest route, along with step-by-step orientation instructions. So, don’t waste time searching for lecture halls - let the “Directions” page guide you!</p> 
+            </div> 
+        </div>
+
+        <div class=“row”> 
+            <div class=“col-12”> <h3 class=“text-center”>Exploring the “Activity” Page</h3> <p class=“text-center” style="text-indent: 50px;">The “Activity” page is a dynamic and interactive platform designed to facilitate the sharing of educational materials for your math classes. This page is a secure space that requires authentication to ensure the privacy and integrity of the materials. As a student, you have the privilege to access a wide range of materials uploaded by your professors, tailored to your specific subject type. This includes lecture notes, assignments, quizzes, and more, all at your fingertips. As a professor, the “Activity” page empowers you to not only upload but also manage your materials effectively. You can add new resources, update existing ones, or delete materials as per the evolving academic needs. The “Activity” page is thus a comprehensive tool for enhancing the teaching and learning experience at MathInfo Academy.</p> 
+            </div> 
+        </div>
+
+        <div class=“row”> 
+            <div class=“col-12”> <h3 class=“text-center”>Navigating the “Grades” Page</h3> <p class=“text-center” style="text-indent: 50px;">The “Grades” page is a transparent and efficient platform where students can track their academic progress. Students can view their scores for each subject type, as well as their final grade for the respective subject. This real-time access to grades helps students understand their strengths and areas for improvement, fostering a proactive approach to learning. On the other hand, professors have the flexibility to modify the maximum score allocated to each subject type, ensuring the grading system aligns with the learning objectives. Professors can also assign scores to each student enrolled in their subject, making the grading process streamlined and fair. The “Grades” page, therefore, serves as a vital tool in the academic journey of both students and professors at MathInfo Academy.</p> 
+            </div> 
+        </div>
+
+        
+    </div>
+{% endblock %}

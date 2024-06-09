@@ -3,12 +3,14 @@
 <!DOCTYPE html>
 <html lang="en"> -->
 
+{% block title %}Directions{% endblock %}
+
 {% block content %}
 <div class="super-container">
     <link rel="stylesheet" href="{% static 'styles/directions.css' %}" />
     <script defer src="{% static 'scripts/directions.js' %}"></script>
     <div class="big-grid">
-        <div class="left-grid">
+        <div class="left-grid bg-light rounded-3 p-5">
             <div id="dropdowns">
                 <div class="dropdown">
                     <h3>Select start</h3>
@@ -53,10 +55,10 @@
                 {% csrf_token %}
                 <input name="start" id="start_node_input" type="hidden" value="-1">
                 <input name="finish" id="end_node_input" type="hidden" value="-1">
-                <input type="submit" value="Get Directions" class="primary-btn">
+                <input type="submit" id="getDirectionsButton" value="Get Directions" class="primary-btn">
             </form>
         </div>
-        <div id="result-container">
+        <div id="result-container" class="bg-light">
             {% if not directions and not error %}
             <h2>
                 Select <span class="green">start</span> and <span class="green">destination</span> to get directions.

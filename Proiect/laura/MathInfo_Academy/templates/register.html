@@ -1,0 +1,45 @@
+{% extends 'navbar.html' %}
+
+{% load static %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+    <link href="{% static 'styles/register.css' %}" rel="stylesheet">
+  
+        <div class=" d-flex justify-content-center align-items-center super-container">
+        
+     
+            <div class="row border rounded-5 p-3 bg-white shadow box-area">
+    
+    
+            <div class="col-md-6 right-box form-container">
+                <div class="flex align-items-center justify-content-center w-75">
+                    <div class="header-text mb-4">
+                        <h2>Hello, dear user!</h2>
+                    </div>
+                    <form action="/register/" method="post">
+                        {% csrf_token %}
+                        {{ form.as_p|safe }}
+                        <div class="input-group mb-3 d-flex justify-content-center">
+                            <input type="submit" class="btn btn-lg btn-primary w-50 fs-6 submit-btn" style="border:none;">
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="w-100 d-flex justify-content-center align-items-center">
+                {% for message in messages %}
+                <p class="text-danger fs-5">{{message}}!</p>
+                {% endfor %}
+            </div>
+    
+            </div>
+        </div>
+{% endblock %}
+
+
+
+
+
+

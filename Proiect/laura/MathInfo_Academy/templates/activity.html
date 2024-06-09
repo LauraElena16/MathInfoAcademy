@@ -1,0 +1,127 @@
+{% extends 'navbar.html' %}
+
+{% block title %}Activity{% endblock %}
+
+{% block content %}
+{% load static %}
+  
+  {% if messages %}
+    {% for message in messages %}
+      {% if message.tags == 'error' %}
+        <div class="alert alert-danger temporary">
+          {{ message }}
+        </div>
+      {% elif message.tags == 'success' %}
+        <div class="alert alert-success temporary">
+          {{ message }}
+        </div>
+      {% else %}
+        <div class="alert alert-{{ message.tags }} temporary">
+          {{ message }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+  
+  <div class="d-flex w-100 justify-content-center align-items-center mt-5 mr-0 ml-0">
+    <link rel="stylesheet" href="{% static 'styles/activity.css' %}">
+    <div id="accordion" class="w-75 bg-light rounded-3 p-3 accordion-container">
+      {% if info_dict %}
+        {% for course, activity_types in info_dict.items %}
+            <div class="card">
+                <div class="card-header" id="heading{{ forloop.counter }}">
+                    <h5 class="mb-0">
+                        <button class="btn" data-toggle="collapse" onclick="toggle_arrow(this)" data-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16">
+                            <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659"/>
+                          </svg>&nbsp;<span class="fw-bold">{{ course }}</span>
+                        </button>
+                    </h5>
+                </div>
+                <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" >
+                    <div class="card-body">
+                        {% for activity_type, materials in activity_types.items %}
+                            <div id="subAccordion{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                <div class="card">
+                                    <div class="card-header" id="subHeading{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                        <h5 class="mb-0 d-flex justify-content-between">
+                                            <button class="btn" onclick="toggle_arrow(this)" data-toggle="collapse" data-target="#subCollapse{{ forloop.parentloop.counter }}-{{ forloop.counter }}" aria-expanded="true" aria-controls="subCollapse{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16">
+                                                <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659"/>
+                                              </svg>&nbsp;{{ activity_type.title }}
+                                            </button>
+
+                                              {% if user.is_teacher %}
+                                                <button type="button" class="btn float-right" data-toggle="modal" data-target="#uploadModal{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                                  <span class="fw-bold" style="color: var(--primary-color-dark);">Upload material</span>
+                                                </button>
+                                            
+                                            <!-- Fereastra modală -->
+                                            <!-- TODO: modifica stilizarea din modala -->
+                                                <div class="modal fade" id="uploadModal{{ forloop.parentloop.counter }}-{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+                                                  <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                      <div class="modal-header">
+                                                        <h5 class="modal-title" id="uploadModalLabel">Upload a new material for {{course.title}} ({{activity_type.title}})</h5>
+                                                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                                                          <span aria-hidden="true"></span>
+                                                        </button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                        <form method="POST" class="d-flex justify-content-between" action="{% url 'upload_material' course activity_type %}" enctype="multipart/form-data">
+                                                          {% csrf_token %}
+                                                          <input type="file" name="documentation">
+                                                          <button type="submit" class="btn btn-primary" style="background-color: var(--primary-color); border:none;">Upload</button>
+                                                        </form>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              {% endif %}
+
+                                        </h5>
+                                    </div>
+                                    <div id="subCollapse{{ forloop.parentloop.counter }}-{{ forloop.counter }}" class="collapse" aria-labelledby="subHeading{{ forloop.parentloop.counter }}-{{ forloop.counter }}" data-parent="#subAccordion{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                        <div class="card-body d-flex flex-column gap-2">
+                                            {% if materials %}
+                                              {% for material in materials %}
+                                                <div class="border-info-subtle d-flex justify-content-between material-row" style="height: 4em; line-height: 4em; padding: 0 1em 0 1em;">
+                                                    <a href="{{ material.url }}" class="material-anchor">{{ material.name }}</a>
+                                                    {% if user.is_teacher %}
+                                                      <!-- TODO: modifica si aici ca sa pasezi id-ul materialului in loc de datele de mai jos (nu determina unic documentatia) -->
+                                                      <form method="POST" action="{% url 'delete_material' material.id %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="_method" value="DELETE">
+                                                        <button type="submit" class="text-danger text-decoration-none delete-button">Delete</button>
+                                                      </form>
+                                                    {% endif %}
+                                                </div>
+                                              {% endfor %}
+                                            {% else %}
+                                              <div class="d-flex justify-content-center align-items-center">
+                                                <h5>No materials found</h5>
+                                              </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+      {% else %}
+        <div class="d-flex justify-content-center align-items-center">
+          <h3>No activity found</h3>
+        </div>
+      {% endif %}
+      </div>
+  </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="{% static 'scripts/activity.js' %}"></script>
+    
+
+{% endblock %}

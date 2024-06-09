@@ -1,3 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins%3Awght%40400%3B500&display=swap%27%29%3B');
+
+:root {
+    --primary-color: #40a44a;
+    --primary-color-light: #4daa69;
+    --primary-color-dark: #248b2b;
+    --secondary-color: #666777;
+    --white-color: #fff;
+    --black-color: #000;
+}
+
 .navbar{
     background-color: #fff;
     height: 80px;
@@ -8,13 +19,23 @@
 
 .navbar-brand {
     font-weight: 500;
-    color: #009970;
+    color: var(--primary-color);
     font-size: 24px;
     transition: 0.3s color;
 }
 
+body {
+    background-image: url("/static/images/universitatea.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    width: 100vw;
+    height: 100vh;
+    font-family: 'Poppins', sans-serif;
+}
+
 .login-button{
-    background-color: #009970;
+    background-color: var(--primary-color);
     color: #fff;
     font-size: 14px;
     padding: 8px 20px;
@@ -23,8 +44,13 @@
     transition: 0.3s background-color;
 }
 
+.navbar-height-placeholder {
+    height: 100px;
+    width: 100vw;
+}
+
 .login-button:hover {
-    background-color: #007d5e;
+    background-color: var(--primary-color-dark);
     color: white;
 }
 
@@ -61,7 +87,7 @@
         transform: translateX(-50%);
         width: 0;
         height: 2px;
-        background-color: #009970;
+        background-color: var(--primary-color);
         visibility: hidden;
         transition: 0.3s ease-in-out;
     }

@@ -1,0 +1,167 @@
+{% extends 'navbar.html' %}
+
+{% block title %}Grades{% endblock %}
+
+{% block content %}
+{% load static %}
+{% load dict_helpers %}
+{% if messages %}
+{% for message in messages %}
+  {% if message.tags == 'error' %}
+    <div class="alert alert-danger temporary">
+      {{ message }}
+    </div>
+  {% elif message.tags == 'success' %}
+    <div class="alert alert-success temporary">
+      {{ message }}
+    </div>
+  {% else %}
+    <div class="alert alert-{{ message.tags }} temporary">
+      {{ message }}
+    </div>
+  {% endif %}
+{% endfor %}
+{% endif %}
+
+<div class="d-flex w-100 justify-content-center align-items-center mt-5 mr-0 ml-0">
+<link rel="stylesheet" href="{% static 'styles/activity.css' %}">
+<link rel="stylesheet" href="{% static 'styles/grades.css' %}">
+<div id="accordion" class="w-75 bg-light rounded-3 p-3 accordion-container">
+  {% if info_dict %}
+      {% if user.is_student %}
+          {% for course, activity_types in info_dict.items %}
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center" id="heading{{ forloop.counter }}">
+                    <h5 class="mb-0">
+                        <button class="btn" data-toggle="collapse" onclick="toggle_arrow(this)" data-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16">
+                            <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659"/>
+                          </svg>&nbsp;<span class="fw-bold">{{ course }}</span>
+                        </button>
+                    </h5>
+                    <span>Final grade: {{ course_grades|get:course|get_item:0 | round_filter }} / {{course_grades|get:course|get_item:1 | round_filter}}</span>
+                </div>
+                <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" >
+                    <div class="card-body">
+                        {% for activity_type, grades in activity_types.items %}
+                          <p>{{ activity_type.title }}: {{ grades.grade | round_filter }} / {{ grades.max_grade | round_filter}}</p>
+
+                        {% endfor %}
+                        <p>Credits: {{ credits|get:course }}</p>
+                    </div>
+                </div>
+            </div>
+          {% endfor %}
+      {% endif %}
+      {% if user.is_teacher %}
+        {% for course, activity_types in info_dict.items %}
+          <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center" id="heading{{ forloop.counter }}">
+                  <h5 class="mb-0">
+                      <button class="btn" data-toggle="collapse" onclick="toggle_arrow(this)" data-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16">
+                          <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659"/>
+                        </svg>&nbsp;<span class="fw-bold">{{ course }}</span>
+                      </button>
+                  </h5>
+              </div>
+              <div id="collapse{{ forloop.counter }}" class="collapse" aria-labelledby="heading{{ forloop.counter }}" >
+                  <div class="card-body">
+                      {% for activity_type, student_info in activity_types.items %}
+                        <div class="card">
+                          <div class="card-header d-flex justify-content-between align-items-center" id="inner-heading{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                              <h5 class="mb-0">
+                                  <button class="btn" data-toggle="collapse" onclick="toggle_arrow(this)" data-target="#inner-collapse{{ forloop.parentloop.counter }}-{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down" viewBox="0 0 16 16">
+                                      <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659"/>
+                                    </svg>&nbsp;<span class="fw-bold">{{ activity_type.title }}</span>
+                                  </button>
+                              </h5>
+                              <div class="d-flex align-items-center gap-3">
+                                <span class="d-flex align-items-center gap-2"><span class="fw-bold">Max grade:</span> {{max_grades|get:course|get:activity_type | round_filter}}</span>
+                                <button type="button" class="btn float-right" data-toggle="modal" data-target="#editMaxGradeModal{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
+                                  <span class="fw-bold" style="color: var(--primary-color-dark);">Edit</span>
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="editMaxGradeModal{{ forloop.parentloop.counter }}-{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="editMaxGradeModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="editMaxGradeModalLabel">Edit Max Grade for {{course.title}} ({{activity_type.title}})</h5>
+                                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                                         
+                                        </button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <form id="editMaxGradeForm" method="post" class="d-flex flex-column gap-3 align-items-center" action="{% url 'modify_max_grade' teach_act_ids|get:course|get:activity_type %}">
+                                          {% csrf_token %}
+                                          <div class="form-group">
+                                            <label for="newMaxGrade">New Max Grade</label>
+                                            <br>
+                                            <input type="number" class="form-control" id="newMaxGrade" name="new_max_grade"  step="0.01" required>
+                                          </div>
+                                          <button type="submit" class="btn btn-primary" style="background-color: var(--primary-color); border:none;">Save Changes</button>
+                                        </form>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                          </div>
+                          <div id="inner-collapse{{ forloop.parentloop.counter }}-{{ forloop.counter }}" class="collapse" aria-labelledby="inner-heading{{ forloop.parentloop.counter }}-{{ forloop.counter }}" >
+                              <div class="card-body contains-grades">
+                                  {% for student_activity_id, student_first_name, student_last_name, student_grade in student_info %}
+                                    <div class="d-flex p-3 justify-content-between grade-row">
+                                      <span class="d-flex gap-3 d-flex align-items-center"><span class="fw-bold">{{ student_first_name }} {{ student_last_name }}:</span> {{ student_grade | round_filter }}</span> 
+                                      <button class="fw-bold btn d-flex align-items-center" style="color: var(--primary-color);" data-target="#editStudentGrade{{ forloop.parentloop.parentloop.counter }}-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" data-toggle="modal">Modify</button>
+                                    </div>
+                                    <div class="modal fade" id="editStudentGrade{{ forloop.parentloop.parentloop.counter }}-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="editStudentGradeModalLabel{{ forloop.parentloop.parentloop.counter }}-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" aria-hidden="true">
+                                      <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                          <div class="modal-header">
+                                            <h5 class="modal-title" id="editStudentGradeModalLabel{{ forloop.parentloop.parentloop.counter }}-{{ forloop.parentloop.counter }}-{{ forloop.counter }}">Edit {{student_first_name}} {{student_last_name}}'s in {{course.title}} ({{activity_type.title}})</h5>
+                                            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                                              <span aria-hidden="true"></span>
+                                            </button>
+                                          </div>
+                                          <div class="modal-body">
+                                            <form id="editStudentGradeForm{{ forloop.parentloop.parentloop.counter }}-{{ forloop.parentloop.counter }}-{{ forloop.counter }}" method="post" class="d-flex flex-column gap-3 align-items-center" action="{% url 'grade_student' student_activity_id %}">
+                                              {% csrf_token %}
+                                              <div class="form-group">
+                                                <label for="newStudentGrade">New Student Grade</label>
+                                                <br>
+                                                <input type="number" class="form-control" id="newStudentGrade" name="new_grade" step="0.01" required>
+                                              </div>
+                                              <button type="submit" class="btn btn-primary" style="background-color: var(--primary-color); border:none;">Save Changes</button>
+                                            </form>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  {% endfor %}
+                              </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                  </div>
+              </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    
+  {% else %}
+    <div class="d-flex justify-content-center align-items-center">
+      <h3>No activity found</h3>
+    </div>
+  {% endif %}
+  </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="{% static 'scripts/activity.js' %}"></script>
+
+{% endblock %}
+
+
+

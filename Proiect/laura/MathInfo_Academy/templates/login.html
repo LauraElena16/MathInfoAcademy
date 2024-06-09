@@ -1,28 +1,51 @@
-<!DOCTYPE html>
-<html>
+{% extends 'navbar.html' %}
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="text/css" , media="screen" href="main.css">
-</head>
+{% load static %}
 
-<body>
-    <form action="login" method="post">
-        {% csrf_token %}
-        <input type="text" name="email" placeholder="Email"><br>
-        <input type="text" name="password" placeholder="Password"><br>
-        <input type="Submit">
-    </form>
+{% block title %}Login{% endblock %}
 
-    <div>
-        {% for message in messages %}
-        <h3>{{message}}</h3>
-        {% endfor %}
-    </div>
+{% block content %}
+    <link href="{% static 'styles/login.css' %}" rel="stylesheet">
+  
+        <div class=" d-flex justify-content-center align-items-center super-container">
+        
+   
+            <div class="row border rounded-5 p-3 bg-white shadow box-area ">
+    
+    
+            <div class="col-md-6 right-box form-container">
+                <div class="flex align-items-center justify-content-center w-75">
+                    <div class="header-text mb-4">
+                        <h2>Hello, dear user!</h2>
+                    </div>
+                    <form action="/login/" method="post">
+                        {% csrf_token %}
+                        <div class="input-group mb-3">
+                            <input type="text" name="username" class="form-control form-control-lg bg-light fs-6" placeholder="Username">
+                        </div>
+                        <div class="input-group mb-1">
+                            <input type="password" name="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
+                        </div>
+                        <br>
+                        <div class="input-group mb-3 d-flex justify-content-center">
+                            <input type="submit" class="btn btn-lg btn-primary w-50 fs-6 submit-btn" style="border:none">
+                        </div>
+                    </form>
+                </div>
+            </div>
 
-</body>
+            <div class="w-100 d-flex justify-content-center align-items-center">
+                {% for message in messages %}
+                <p class="text-danger fs-5">{{message}}!</p>
+                {% endfor %}
+            </div>
+    
+    
+            </div>
+        </div>
+{% endblock %}
 
-</html>
+
+
+
+
