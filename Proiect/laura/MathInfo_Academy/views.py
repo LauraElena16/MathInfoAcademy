@@ -165,7 +165,6 @@ def delete_material(request, material_id):
 
 def directions(request):
     graph = Graph()
-    print("HERE:", -1 in graph.info)
     directions = []
     error = ""
     start = None
@@ -289,7 +288,7 @@ def grade_student(request, student_activity_id):
         if grade < 0 or grade > teacher_activity.max_grade:
             messages.error(request, 'Invalid grade! Please, enter a grade between 0 and the maximum grade!')
             return redirect('/grades')
-        student_activity = Students_Activity.objects.get(student=student, teacher_activity=teacher_activity)
+        
         student_activity.grade = grade
         student_activity.save()
         messages.success(request, 'Grade updated successfully!')

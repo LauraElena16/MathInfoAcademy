@@ -88,9 +88,7 @@ class Graph(Singleton):
                     q.put([next_node, curr_path + [next_node]])
 
                     
-    # Functie care primeste o lista de etichete de noduri (path) si returneaza o lista de directii (strings)
-    # Ar trebui sa calculeze virajele (cate 3 noduri consecutive) si sa nu puna in lista de directii noduri de tip h intermediare
-    # sau noduri de tip he intermediare (ex. cand urci de la subsol la 3 sa nu treaca prin toate nodurile)
+
     def get_directions_for_path(self, path: list[int]) -> list[str]:
         directions = []
         steer_mapping = {-1: "right", 1: "left", 0: "straight ahead"}
@@ -153,8 +151,6 @@ class Graph(Singleton):
         return directions
 
 
-    # Functie care primeste 3 puncte si calculeaza determinantul din testul de orientare
-    # Returneaza -1 pentru viraj la dreapta, 1 pentru viraj la stanga si 0 pentru coliniaritate
     def __orientation_test(self, p, q, r):
         result = q.x * r.y + p.x * q.y + p.y * r.x - q.x * p.y - r.x * q.y - r.y * p.x
         return -1 if result < 0 else (1 if result > 0 else 0)
@@ -169,8 +165,4 @@ class Graph(Singleton):
     
     
 
-if __name__ == "__main__":
-    graph = Graph('graph.txt')
-    path = graph.find_min_path(207, 212)
-    print(path)
 
