@@ -48,6 +48,7 @@ def user_logout(request):
 
 
 def register(request):
+    print("register", request.POST)
     if request.user.is_authenticated:
         return redirect('/')
     
@@ -58,6 +59,7 @@ def register(request):
             return redirect('login')
     else:
         form = RegistrationForm()
+        
     return render(request, 'register.html', {'form': form})
  
 
@@ -68,30 +70,35 @@ def register(request):
 def activity(request):
     if request.method != 'GET':
         return redirect('/')
-    
+   
     if request.user.is_student:
         student_activities = list(Students_Activity.objects.filter(student=request.user))
         info_dict = {}
+        teachers_names = {}
         for student_activity in student_activities:
             teacher_activity = student_activity.teacher_activity
             course_name = teacher_activity.course.name
             activity_type = teacher_activity.activity_type
-
+            teacher_name = teacher_activity.teacher.first_name + " " + teacher_activity.teacher.last_name
+ 
             if course_name not in info_dict:
                 info_dict[course_name] = {}
-
+                teachers_names[course_name] = {}
+ 
             if activity_type not in info_dict[course_name]:
                 info_dict[course_name][activity_type] = []
-
+                teachers_names[course_name][activity_type] = teacher_name
+ 
             materials = Materials.objects.filter(teacher_activity=teacher_activity)
             for material in materials:
                 info_dict[course_name][activity_type].append({
                     'url': material.documentation.url,
                     'name': material.documentation.name.split('/')[-1]
                 })
-
-        return render(request, 'activity.html', {'info_dict': info_dict})
-        
+               
+ 
+        return render(request, 'activity.html', {'info_dict': info_dict, "teachers_names": teachers_names})
+       
     else:
         teacher_activities = list(Teacher_Activity.objects.filter(teacher=request.user))
         info_dict = {}
@@ -99,15 +106,15 @@ def activity(request):
         for teacher_activity in teacher_activities:
             course_name = teacher_activity.course.name
             activity_type = teacher_activity.activity_type
-
+ 
             if course_name not in info_dict:
                 info_dict[course_name] = {}
                 teach_act_dict[course_name] = {}
-
+ 
             if activity_type not in info_dict[course_name]:
                 info_dict[course_name][activity_type] = []
                 teach_act_dict[course_name][activity_type] = teacher_activity
-
+ 
             materials = Materials.objects.filter(teacher_activity=teacher_activity)
             for material in materials:
                 info_dict[course_name][activity_type].append({
@@ -115,7 +122,7 @@ def activity(request):
                     'name': material.documentation.name.split('/')[-1],
                     'id': material.id
                 })
-
+ 
         return render(request, 'activity.html', {'info_dict': info_dict, 'teach_act_dict': teach_act_dict})
 
 

@@ -3,6 +3,7 @@
 {% block title %}Activity{% endblock %}
 
 {% block content %}
+{% load dict_helpers %} 
 {% load static %}
   
   {% if messages %}
@@ -50,14 +51,15 @@
                                                 <path d="M3.204 5h9.592L8 10.481zm-.753.659 4.796 5.48a1 1 0 0 0 1.506 0l4.796-5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 0-.753 1.659"/>
                                               </svg>&nbsp;{{ activity_type.title }}
                                             </button>
-
+                                              {% if user.is_student %}
+                                                  <div class="float-right d-flex align-items-center fs-6"><span class="fw-bold">Teacher:&nbsp;</span>{{teachers_names|get:course|get:activity_type}}</div>
+                                              {% endif %}
                                               {% if user.is_teacher %}
                                                 <button type="button" class="btn float-right" data-toggle="modal" data-target="#uploadModal{{ forloop.parentloop.counter }}-{{ forloop.counter }}">
                                                   <span class="fw-bold" style="color: var(--primary-color-dark);">Upload material</span>
                                                 </button>
                                             
-                                            <!-- Fereastra modală -->
-                                            <!-- TODO: modifica stilizarea din modala -->
+                                            
                                                 <div class="modal fade" id="uploadModal{{ forloop.parentloop.counter }}-{{ forloop.counter }}" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
                                                   <div class="modal-dialog" role="document">
                                                     <div class="modal-content">
@@ -88,7 +90,7 @@
                                                 <div class="border-info-subtle d-flex justify-content-between material-row" style="height: 4em; line-height: 4em; padding: 0 1em 0 1em;">
                                                     <a href="{{ material.url }}" class="material-anchor">{{ material.name }}</a>
                                                     {% if user.is_teacher %}
-                                                      <!-- TODO: modifica si aici ca sa pasezi id-ul materialului in loc de datele de mai jos (nu determina unic documentatia) -->
+                                                      
                                                       <form method="POST" action="{% url 'delete_material' material.id %}">
                                                         {% csrf_token %}
                                                         <input type="hidden" name="_method" value="DELETE">
